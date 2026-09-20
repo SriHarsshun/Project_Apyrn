@@ -10,6 +10,7 @@ describe('PrismaUserRepository', () => {
     prisma = {
       user: {
         findUnique: jest.fn(),
+        findFirst: jest.fn(),
         findMany: jest.fn(),
         create: jest.fn(),
         update: jest.fn(),
@@ -25,7 +26,7 @@ describe('PrismaUserRepository', () => {
   });
 
   it('findById', async () => {
-    prisma.user.findUnique.mockResolvedValue({ id: 'u1' });
+    prisma.user.findFirst.mockResolvedValue({ id: 'u1' });
     const res = await repository.findById('u1', 'c1');
     expect(res?.id).toBe('u1');
   });
@@ -43,12 +44,14 @@ describe('PrismaUserRepository', () => {
   });
 
   it('update', async () => {
+    prisma.user.findFirst.mockResolvedValue({ id: 'u1' });
     prisma.user.update.mockResolvedValue({ id: 'u1' });
     const res = await repository.update('u1', { name: 'n' } as any, 'c1');
     expect(res.id).toBe('u1');
   });
 
   it('delete', async () => {
+    prisma.user.findFirst.mockResolvedValue({ id: 'u1' });
     prisma.user.delete.mockResolvedValue({ id: 'u1' });
     const res = await repository.delete('u1', 'c1');
     expect(res.id).toBe('u1');
