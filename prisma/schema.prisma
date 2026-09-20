@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  VIEWER
+}
+
+enum ItemStatus {
+  IN_STOCK
+  LOW_STOCK
+  OUT_OF_STOCK
+}
+
+enum AdjustmentType {
+  ADDITION
+  SUBTRACTION
+  MANUAL_SET
+}
+
+model Company {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  users     User[]
+  items     Item[]
+  auditLogs AuditLog[]
+
+  @@map("companies")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(VIEWER)
+  companyId String   @map("company_id")
+  company   Company  @relation(fields: [companyId], references: [id])
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  auditLogs AuditLog[]
+
+  @@index([companyId])
+  @@index([email])
+  @@map("users")
+}
+
+model Item {
+  id           String     @id @default(uuid())
+  title        String
+  description  String?
+  sku          String
+  quantity     Int        @default(0)
+  status       ItemStatus @default(OUT_OF_STOCK)
+  category     String?
+  reorderPoint Int        @default(10) @map("reorder_point")
+  companyId    String     @map("company_id")
+  company      Company    @relation(fields: [companyId], references: [id])
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+  deletedAt    DateTime?  @map("deleted_at")
+
+  auditLogs AuditLog[]
+
+  @@unique([sku, companyId])
+  @@index([companyId])
+  @@index([status])
+  @@index([category])
+  @@index([companyId, deletedAt])
+  @@index([title])
+  @@map("items")
+}
+
+model AuditLog {
+  id               String          @id @default(uuid())
+  action           String
+  entityType       String          @map("entity_type")
+  entityId         String          @map("entity_id")
+  adjustmentType   AdjustmentType? @map("adjustment_type")
+  quantityChange   Int?            @map("quantity_change")
+  previousQuantity Int?            @map("previous_quantity")
+  newQuantity      Int?            @map("new_quantity")
+  reason           String?
+  metadata         Json?
+  userId           String          @map("user_id")
+  user             User            @relation(fields: [userId], references: [id])
+  companyId        String          @map("company_id")
+  company          Company         @relation(fields: [companyId], references: [id])
+  itemId           String?         @map("item_id")
+  item             Item?           @relation(fields: [itemId], references: [id])
+  createdAt        DateTime        @default(now()) @map("created_at")
+
+  @@index([companyId])
+  @@index([itemId])
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
+}
