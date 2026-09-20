@@ -21,6 +21,15 @@ import { HealthModule } from './health/health.module';
       useFactory: () => ({
         pinoHttp: {
           transport: process.env.NODE_ENV !== 'production' ? { target: 'pino-pretty' } : undefined,
+          mixin() {
+            const store = require('./common/context/request-context').getRequestContext();
+            return {
+              requestId: store?.requestId,
+              userId: store?.userId,
+              companyId: store?.companyId,
+              action: store?.action || 'HTTP_REQUEST',
+            };
+          },
         },
       }),
     }),

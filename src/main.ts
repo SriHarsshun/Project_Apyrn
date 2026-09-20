@@ -5,6 +5,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { Logger } from 'nestjs-pino';
 
 async function bootstrap() {
@@ -31,7 +32,10 @@ async function bootstrap() {
   );
 
   app.useGlobalFilters(new GlobalExceptionFilter());
-  app.useGlobalInterceptors(new LoggingInterceptor());
+  app.useGlobalInterceptors(
+    new LoggingInterceptor(),
+    new TransformInterceptor()
+  );
 
   const config = new DocumentBuilder()
     .setTitle('Project Apyrn API')
@@ -41,7 +45,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
+  SwaggerModule.setup('api', app, document);
 
   const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
   await app.listen(port, '0.0.0.0');

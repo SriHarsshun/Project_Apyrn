@@ -25,6 +25,7 @@ export class ItemsController {
   @Get()
   @Roles(Role.ADMIN, Role.MANAGER, Role.VIEWER)
   @ApiOperation({ summary: 'Get items with pagination and filters' })
+  @ApiResponse({ status: 200, type: [ItemResponseDto] })
   async findMany(@Query() query: QueryItemDto, @CompanyId() companyId: string) {
     const result = await this.itemsService.findMany(query, companyId);
     return { data: result };
@@ -76,7 +77,7 @@ export class ItemsController {
   }
 
   @Delete(':id')
-  @Roles(Role.ADMIN, Role.MANAGER)
+  @Roles(Role.ADMIN)
   @ApiOperation({ summary: 'Soft delete item' })
   @ApiResponse({ status: 200, type: ItemResponseDto })
   async remove(

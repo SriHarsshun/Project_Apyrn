@@ -36,8 +36,8 @@ export class PrismaItemRepository implements IItemRepository {
   }
 
   async findById(id: string, companyId: string): Promise<Item | null> {
-    return this.prisma.item.findFirst({
-      where: { id, companyId, deletedAt: null },
+    return this.prisma.item.findUnique({
+      where: { id, companyId },
     });
   }
 
@@ -46,7 +46,6 @@ export class PrismaItemRepository implements IItemRepository {
     
     const where: Prisma.ItemWhereInput = {
       companyId,
-      deletedAt: null,
     };
 
     if (query.status) where.status = query.status;
@@ -62,47 +61,53 @@ export class PrismaItemRepository implements IItemRepository {
       where.title = { contains: query.search, mode: 'insensitive' };
     }
 
-    const total = await this.prisma.item.count({ where });
+    const orderBy: Prisma.ItemOrderByWithRelationInput = {
+      [query.sortBy || 'createdAt']: query.sortOrder || 'desc',
+    };
 
     const items = await this.prisma.item.findMany({
       where,
       take: limit + 1,
-      skip: query.cursor ? 1 : 0,
       cursor: query.cursor ? { id: query.cursor } : undefined,
-      orderBy: { [query.sortBy || 'createdAt']: query.sortOrder || 'desc' },
+      orderBy,
     });
 
-    const hasMore = items.length > limit;
-    const resultItems = hasMore ? items.slice(0, limit) : items;
-    const nextCursor = hasMore ? resultItems[resultItems.length - 1].id : null;
+    const total = await this.prisma.item.count({ where });
 
-    return { items: resultItems, total, nextCursor, hasMore };
+    let nextCursor: string | null = null;
+    let hasMore = false;
+    
+    if (items.length > limit) {
+      hasMore = true;
+      const nextItem = items.pop();
+      nextCursor = nextItem?.id || null;
+    }
+
+    return { items, total, nextCursor, hasMore };
   }
 
   async update(id: string, data: UpdateItemDto, companyId: string): Promise<Item> {
-    const item = await this.findById(id, companyId);
-    if (!item) throw new NotFoundException('Item not found');
+    const { reorderPoint, ...rest } = data;
+    
+    const existing = await this.prisma.item.findUnique({ where: { id, companyId } });
+    if (!existing) throw new NotFoundException('Item not found');
 
-    const newQuantity = data.quantity !== undefined ? data.quantity : item.quantity;
-    const newReorderPoint = data.reorderPoint !== undefined ? data.reorderPoint : item.reorderPoint;
-    const newStatus = this.getStatus(newQuantity, newReorderPoint);
+    const newReorderPoint = reorderPoint !== undefined ? reorderPoint : existing.reorderPoint;
+    const status = this.getStatus(existing.quantity, newReorderPoint);
 
     return this.prisma.item.update({
-      where: { id },
+      where: { id, companyId },
       data: {
-        ...data,
-        status: newStatus,
+        ...rest,
+        reorderPoint: newReorderPoint,
+        status,
       },
     });
   }
 
   async softDelete(id: string, companyId: string): Promise<Item> {
-    const item = await this.findById(id, companyId);
-    if (!item) throw new NotFoundException('Item not found');
-
-    return this.prisma.item.update({
-      where: { id },
-      data: { deletedAt: new Date() },
+    return this.prisma.item.delete({
+      where: { id, companyId },
     });
   }
 

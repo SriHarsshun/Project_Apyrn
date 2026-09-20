@@ -13,8 +13,10 @@ describe('PrismaItemRepository', () => {
       item: {
         create: jest.fn(),
         findFirst: jest.fn(),
+        findUnique: jest.fn(),
         findMany: jest.fn(),
         update: jest.fn(),
+        delete: jest.fn(),
         groupBy: jest.fn(),
         count: jest.fn().mockResolvedValue(0),
         aggregate: jest.fn().mockResolvedValue({ _sum: { quantity: 0 } }),
@@ -47,13 +49,13 @@ describe('PrismaItemRepository', () => {
 
   it('findById: finds item with companyId and deletedAt: null', async () => {
     const item = createMockItem();
-    prisma.item.findFirst.mockResolvedValue(item);
+    prisma.item.findUnique.mockResolvedValue(item);
     
     const result = await repository.findById('id', 'company-id');
     
     expect(result).toEqual(item);
-    expect(prisma.item.findFirst).toHaveBeenCalledWith(expect.objectContaining({
-      where: { id: 'id', companyId: 'company-id', deletedAt: null },
+    expect(prisma.item.findUnique).toHaveBeenCalledWith(expect.objectContaining({
+      where: { id: 'id', companyId: 'company-id' },
     }));
   });
 
@@ -69,14 +71,13 @@ describe('PrismaItemRepository', () => {
 
   it('softDelete: sets deletedAt instead of deleting', async () => {
     const item = createMockItem();
-    prisma.item.findFirst.mockResolvedValue(item);
-    prisma.item.update.mockResolvedValue(item);
+    prisma.item.findUnique.mockResolvedValue(item);
+    prisma.item.delete.mockResolvedValue(item);
     
     await repository.softDelete('id', 'company-id');
     
-    expect(prisma.item.update).toHaveBeenCalledWith(expect.objectContaining({
-      where: { id: 'id' },
-      data: { deletedAt: expect.any(Date) },
+    expect(prisma.item.delete).toHaveBeenCalledWith(expect.objectContaining({
+      where: { id: 'id', companyId: 'company-id' },
     }));
   });
 

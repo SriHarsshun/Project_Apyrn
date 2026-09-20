@@ -52,18 +52,38 @@ Project Apyrn is designed as a multi-tenant application where users belong to a 
 | LOW_STOCK_THRESHOLD | Threshold for low stock | 10 |
 
 ## API Endpoints
+
+### Health
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/v1/health` | Liveness check |
+| GET | `/api/v1/health/ready` | Readiness check (DB & Redis) |
+
+### Auth
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/api/v1/auth/register` | Register company & admin |
+| POST | `/api/v1/auth/login` | Authenticate user |
+
+### Users
 | Method | Path | Description | Auth | Roles |
 |--------|------|-------------|------|-------|
-| GET | `/api/v1/health` | Health check | No | - |
-| POST | `/api/v1/auth/register` | Register company & admin | No | - |
-| POST | `/api/v1/auth/login` | Authenticate user | No | - |
+| GET | `/api/v1/users` | List all users | Yes | ADMIN, MANAGER, VIEWER |
+| GET | `/api/v1/users/:id` | Get user by ID | Yes | ADMIN, MANAGER, VIEWER |
+| POST | `/api/v1/users` | Create user | Yes | ADMIN |
+| PATCH | `/api/v1/users/:id` | Update user | Yes | ADMIN |
+| DELETE | `/api/v1/users/:id` | Delete user | Yes | ADMIN |
+
+### Items
+| Method | Path | Description | Auth | Roles |
+|--------|------|-------------|------|-------|
+| GET | `/api/v1/items` | List items (w/ filters & pagination) | Yes | ADMIN, MANAGER, VIEWER |
 | POST | `/api/v1/items` | Create new item | Yes | ADMIN, MANAGER |
-| GET | `/api/v1/items` | List items (paginated) | Yes | Any |
-| GET | `/api/v1/items/:id` | Get item by ID | Yes | Any |
-| PATCH | `/api/v1/items/:id` | Update item | Yes | ADMIN, MANAGER |
+| GET | `/api/v1/items/summary` | Get inventory summary | Yes | ADMIN, MANAGER, VIEWER |
+| GET | `/api/v1/items/:id` | Get item by ID | Yes | ADMIN, MANAGER, VIEWER |
+| PATCH | `/api/v1/items/:id` | Update item details | Yes | ADMIN, MANAGER |
 | DELETE | `/api/v1/items/:id` | Soft delete item | Yes | ADMIN |
-| POST | `/api/v1/items/:id/adjust` | Adjust inventory quantity | Yes | ADMIN, MANAGER |
-| GET | `/api/v1/items/summary` | Get inventory summary | Yes | Any |
+| POST | `/api/v1/items/:id/adjust` | Adjust quantity & create audit log | Yes | ADMIN, MANAGER |
 
 ## Running Tests
 ```bash

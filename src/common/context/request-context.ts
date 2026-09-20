@@ -4,6 +4,7 @@ export type RequestContextStore = {
   requestId: string;
   userId?: string;
   companyId?: string;
+  action?: string;
 };
 
 export const requestContext = new AsyncLocalStorage<RequestContextStore>();
