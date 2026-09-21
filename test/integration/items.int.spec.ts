@@ -46,10 +46,16 @@ describe('Items Integration', () => {
 
   afterAll(async () => {
     if (prisma) {
-      await prisma.auditLog.deleteMany();
-      await prisma.item.deleteMany();
-      await prisma.user.deleteMany();
-      await prisma.company.deleteMany();
+      try {
+        await prisma.$executeRawUnsafe(
+          'TRUNCATE TABLE "audit_logs", "items", "users", "companies" CASCADE;',
+        );
+      } catch {
+        await prisma.auditLog.deleteMany();
+        await prisma.$executeRawUnsafe('DELETE FROM "items";');
+        await prisma.user.deleteMany();
+        await prisma.company.deleteMany();
+      }
       await prisma.$disconnect();
     }
     if (moduleRef) {
