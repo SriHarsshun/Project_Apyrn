@@ -25,7 +25,7 @@ describe('LowStockProcessor', () => {
         companyId: 'C1',
       },
     } as any;
-    
+
     await processor.process(job);
     expect(loggerSpy).toHaveBeenCalled();
   });

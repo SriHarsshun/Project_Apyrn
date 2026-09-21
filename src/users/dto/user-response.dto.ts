@@ -1,7 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Prisma, Role } from '@prisma/client';
-
-type User = Prisma.UserGetPayload<{}>;
+import { Role, User } from '@prisma/client';
 
 export class UserResponseDto {
   @ApiProperty()

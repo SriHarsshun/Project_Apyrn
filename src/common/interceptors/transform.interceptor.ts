@@ -11,7 +11,7 @@ export interface Response<T> {
 export class TransformInterceptor<T> implements NestInterceptor<T, Response<T>> {
   intercept(context: ExecutionContext, next: CallHandler): Observable<Response<T>> {
     return next.handle().pipe(
-      map(result => {
+      map((result) => {
         // If the controller already returned `{ data }`, return it as is.
         // Otherwise, wrap it.
         if (result && typeof result === 'object' && 'data' in result) {

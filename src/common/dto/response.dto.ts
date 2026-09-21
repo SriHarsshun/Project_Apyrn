@@ -15,13 +15,13 @@ export class ApiResponse<T> {
 export function successResponse<T>(data: T, meta?: PaginationMeta): ApiResponse<T> {
   return {
     data,
-    ...(meta && { meta })
+    ...(meta && { meta }),
   };
 }
 
 export function errorResponse(errors: any[]): ApiResponse<null> {
   return {
     data: null as any,
-    errors
+    errors,
   };
 }

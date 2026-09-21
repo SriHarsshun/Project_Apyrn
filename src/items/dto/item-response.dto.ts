@@ -1,7 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Prisma, ItemStatus } from '@prisma/client';
-
-type Item = Prisma.ItemGetPayload<{}>;
+import { ItemStatus, Item } from '@prisma/client';
 
 export class ItemResponseDto {
   @ApiProperty()

@@ -1,6 +1,4 @@
-import { Prisma } from '@prisma/client';
-
-type User = Prisma.UserGetPayload<{}>;
+import { User } from '@prisma/client';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 

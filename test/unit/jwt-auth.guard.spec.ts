@@ -11,8 +11,12 @@ describe('JwtAuthGuard', () => {
   });
 
   it('handleRequest throws if err or no user', () => {
-    expect(() => guard.handleRequest(new UnauthorizedException('Auth failed'), null, null, {} as any)).toThrow(UnauthorizedException);
-    expect(() => guard.handleRequest(null, null, null, {} as ExecutionContext)).toThrow(UnauthorizedException);
+    expect(() =>
+      guard.handleRequest(new UnauthorizedException('Auth failed'), null, null, {} as any),
+    ).toThrow(UnauthorizedException);
+    expect(() => guard.handleRequest(null, null, null, {} as ExecutionContext)).toThrow(
+      UnauthorizedException,
+    );
   });
 
   it('handleRequest returns user', () => {

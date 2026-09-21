@@ -40,7 +40,11 @@ describe('GlobalExceptionFilter', () => {
   });
 
   it('Handles AppException with errorCode', () => {
-    const exception = new AppException({ message: 'Custom error', statusCode: 400, errorCode: 'CUSTOM_ERR' });
+    const exception = new AppException({
+      message: 'Custom error',
+      statusCode: 400,
+      errorCode: 'CUSTOM_ERR',
+    });
     filter.catch(exception, mockHost);
     expect(mockResponse.code).toHaveBeenCalledWith(400);
     expect(mockResponse.send).toHaveBeenCalledWith(

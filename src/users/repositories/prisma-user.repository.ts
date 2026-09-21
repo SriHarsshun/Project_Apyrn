@@ -1,7 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-
-type User = Prisma.UserGetPayload<{}>;
+import { User } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { IUserRepository } from '../interfaces/user-repository.interface';
 import { CreateUserDto } from '../dto/create-user.dto';
@@ -41,7 +39,7 @@ export class PrismaUserRepository implements IUserRepository {
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    
+
     return this.prisma.user.update({
       where: { id },
       data: {

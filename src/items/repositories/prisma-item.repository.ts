@@ -1,8 +1,5 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { Prisma, ItemStatus, AdjustmentType } from '@prisma/client';
-
-type Item = Prisma.ItemGetPayload<{}>;
-type AuditLog = Prisma.AuditLogGetPayload<{}>;
+import { Prisma, ItemStatus, AdjustmentType, Item, AuditLog } from '@prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { IItemRepository } from '../interfaces/item-repository.interface';
 import { CreateItemDto } from '../dto/create-item.dto';
@@ -41,16 +38,19 @@ export class PrismaItemRepository implements IItemRepository {
     });
   }
 
-  async findMany(query: QueryItemDto, companyId: string): Promise<{ items: Item[]; total: number; nextCursor: string | null; hasMore: boolean }> {
+  async findMany(
+    query: QueryItemDto,
+    companyId: string,
+  ): Promise<{ items: Item[]; total: number; nextCursor: string | null; hasMore: boolean }> {
     const limit = query.limit || 10;
-    
+
     const where: Prisma.ItemWhereInput = {
       companyId,
     };
 
     if (query.status) where.status = query.status;
     if (query.category) where.category = query.category;
-    
+
     if (query.minQuantity !== undefined || query.maxQuantity !== undefined) {
       where.quantity = {};
       if (query.minQuantity !== undefined) where.quantity.gte = query.minQuantity;
@@ -76,7 +76,7 @@ export class PrismaItemRepository implements IItemRepository {
 
     let nextCursor: string | null = null;
     let hasMore = false;
-    
+
     if (items.length > limit) {
       hasMore = true;
       const nextItem = items.pop();
@@ -88,7 +88,7 @@ export class PrismaItemRepository implements IItemRepository {
 
   async update(id: string, data: UpdateItemDto, companyId: string): Promise<Item> {
     const { reorderPoint, ...rest } = data;
-    
+
     const existing = await this.prisma.item.findUnique({ where: { id, companyId } });
     if (!existing) throw new NotFoundException('Item not found');
 
@@ -111,7 +111,12 @@ export class PrismaItemRepository implements IItemRepository {
     });
   }
 
-  async adjustQuantity(id: string, companyId: string, adjustment: AdjustItemDto, userId: string): Promise<{ item: Item; auditLog: AuditLog }> {
+  async adjustQuantity(
+    id: string,
+    companyId: string,
+    adjustment: AdjustItemDto,
+    userId: string,
+  ): Promise<{ item: Item; auditLog: AuditLog }> {
     return this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const item = await tx.item.findFirst({
         where: { id, companyId, deletedAt: null },
@@ -146,7 +151,10 @@ export class PrismaItemRepository implements IItemRepository {
           entityType: 'ITEM',
           itemId: item.id,
           adjustmentType: adjustment.adjustmentType,
-          quantityChange: adjustment.adjustmentType === AdjustmentType.SUBTRACTION ? -adjustment.quantity : adjustment.quantity,
+          quantityChange:
+            adjustment.adjustmentType === AdjustmentType.SUBTRACTION
+              ? -adjustment.quantity
+              : adjustment.quantity,
           previousQuantity: item.quantity,
           newQuantity,
           reason: adjustment.reason,

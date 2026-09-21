@@ -28,21 +28,25 @@ export class ItemsService {
 
   private async checkLowStock(item: any, companyId: string) {
     if (item.status === ItemStatus.LOW_STOCK || item.status === ItemStatus.OUT_OF_STOCK) {
-      await this.lowStockQueue.add('low-stock-alert', {
-        id: item.id,
-        title: item.title,
-        sku: item.sku,
-        quantity: item.quantity,
-        reorderPoint: item.reorderPoint,
-        companyId,
-      }, { removeOnComplete: true });
+      await this.lowStockQueue.add(
+        'low-stock-alert',
+        {
+          id: item.id,
+          title: item.title,
+          sku: item.sku,
+          quantity: item.quantity,
+          reorderPoint: item.reorderPoint,
+          companyId,
+        },
+        { removeOnComplete: true },
+      );
     }
   }
 
   async create(dto: CreateItemDto, companyId: string, userId: string): Promise<ItemResponseDto> {
     const item = await this.itemRepository.create(dto, companyId);
     await this.invalidateSummaryCache(companyId);
-    
+
     await this.prisma.auditLog.create({
       data: {
         action: 'CREATE_ITEM',
@@ -73,7 +77,12 @@ export class ItemsService {
     };
   }
 
-  async update(id: string, dto: UpdateItemDto, companyId: string, userId: string): Promise<ItemResponseDto> {
+  async update(
+    id: string,
+    dto: UpdateItemDto,
+    companyId: string,
+    userId: string,
+  ): Promise<ItemResponseDto> {
     const item = await this.itemRepository.update(id, dto, companyId);
     await this.invalidateSummaryCache(companyId);
 
@@ -112,7 +121,12 @@ export class ItemsService {
     return ItemResponseDto.fromEntity(item);
   }
 
-  async adjustQuantity(id: string, dto: AdjustItemDto, companyId: string, userId: string): Promise<ItemResponseDto> {
+  async adjustQuantity(
+    id: string,
+    dto: AdjustItemDto,
+    companyId: string,
+    userId: string,
+  ): Promise<ItemResponseDto> {
     const { item } = await this.itemRepository.adjustQuantity(id, companyId, dto, userId);
     await this.invalidateSummaryCache(companyId);
     await this.checkLowStock(item, companyId);

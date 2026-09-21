@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, Version, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  Version,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { ItemsService } from './items.service';
@@ -44,7 +55,10 @@ export class ItemsController {
   @Roles(Role.ADMIN, Role.MANAGER, Role.VIEWER)
   @ApiOperation({ summary: 'Get item by ID' })
   @ApiResponse({ status: 200, type: ItemResponseDto })
-  async findById(@Param('id') id: string, @CompanyId() companyId: string): Promise<{ data: ItemResponseDto }> {
+  async findById(
+    @Param('id') id: string,
+    @CompanyId() companyId: string,
+  ): Promise<{ data: ItemResponseDto }> {
     const data = await this.itemsService.findById(id, companyId);
     return { data };
   }

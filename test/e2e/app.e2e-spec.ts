@@ -22,19 +22,28 @@ describe('AppController (e2e)', () => {
       .overrideProvider(LowStockProcessor)
       .useValue({ process: jest.fn() })
       .overrideProvider(RedisService)
-      .useValue({ getClient: () => ({ get: jest.fn(), set: jest.fn(), del: jest.fn(), ping: jest.fn().mockResolvedValue('PONG') }) })
+      .useValue({
+        getClient: () => ({
+          get: jest.fn(),
+          set: jest.fn(),
+          del: jest.fn(),
+          ping: jest.fn().mockResolvedValue('PONG'),
+        }),
+      })
       .overrideProvider(getQueueToken('low-stock-alerts'))
       .useValue({ add: jest.fn() })
       .compile();
 
     app = moduleFixture.createNestApplication<NestFastifyApplication>(new FastifyAdapter());
-    
+
     app.setGlobalPrefix('api');
     app.enableVersioning({
       type: VersioningType.URI,
       defaultVersion: '1',
     });
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
+    );
     app.useGlobalFilters(new GlobalExceptionFilter());
     app.useGlobalInterceptors(new LoggingInterceptor());
 
@@ -97,7 +106,7 @@ describe('AppController (e2e)', () => {
         title: 'Another E2E Item',
         description: 'Test',
         quantity: 5,
-        category: 'Electronics'
+        category: 'Electronics',
       });
 
     const res = await request(app.getHttpServer())
@@ -141,16 +150,14 @@ describe('AppController (e2e)', () => {
         email: `viewer-${Date.now()}@example.com`,
         password: 'password123',
         name: 'Viewer',
-        role: 'VIEWER'
+        role: 'VIEWER',
       });
-    
+
     // Login as viewer
-    const loginRes = await request(app.getHttpServer())
-      .post('/api/v1/auth/login')
-      .send({
-        email: viewerRes.body.data.email,
-        password: 'password123'
-      });
+    const loginRes = await request(app.getHttpServer()).post('/api/v1/auth/login').send({
+      email: viewerRes.body.data.email,
+      password: 'password123',
+    });
     const viewerToken = loginRes.body.data.accessToken;
 
     // Try to mutate items
@@ -181,16 +188,14 @@ describe('AppController (e2e)', () => {
         email: `manager-${Date.now()}@example.com`,
         password: 'password123',
         name: 'Manager',
-        role: 'MANAGER'
+        role: 'MANAGER',
       });
-    
+
     // Login as manager
-    const loginRes = await request(app.getHttpServer())
-      .post('/api/v1/auth/login')
-      .send({
-        email: managerRes.body.data.email,
-        password: 'password123'
-      });
+    const loginRes = await request(app.getHttpServer()).post('/api/v1/auth/login').send({
+      email: managerRes.body.data.email,
+      password: 'password123',
+    });
     const managerToken = loginRes.body.data.accessToken;
 
     // Try to create a user
@@ -201,10 +206,10 @@ describe('AppController (e2e)', () => {
         email: `test-${Date.now()}@example.com`,
         password: 'password123',
         name: 'Test',
-        role: 'VIEWER'
+        role: 'VIEWER',
       })
       .expect(403);
-    
+
     console.log('ERROR RESPONSE FORMAT:', JSON.stringify(errRes.body, null, 2));
   });
 });

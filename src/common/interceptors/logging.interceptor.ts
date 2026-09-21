@@ -15,7 +15,9 @@ export class LoggingInterceptor implements NestInterceptor {
     const userId = ctx?.userId || '-';
     const companyId = ctx?.companyId || '-';
 
-    this.logger.log(`[REQ] ${method} ${url} | ReqID: ${requestId} | User: ${userId} | Company: ${companyId}`);
+    this.logger.log(
+      `[REQ] ${method} ${url} | ReqID: ${requestId} | User: ${userId} | Company: ${companyId}`,
+    );
 
     const now = Date.now();
 
@@ -24,8 +26,10 @@ export class LoggingInterceptor implements NestInterceptor {
         const response = context.switchToHttp().getResponse();
         const statusCode = response.statusCode || response.raw?.statusCode;
         const duration = Date.now() - now;
-        
-        this.logger.log(`[RES] ${method} ${url} ${statusCode} - ${duration}ms | ReqID: ${requestId}`);
+
+        this.logger.log(
+          `[RES] ${method} ${url} ${statusCode} - ${duration}ms | ReqID: ${requestId}`,
+        );
       }),
     );
   }

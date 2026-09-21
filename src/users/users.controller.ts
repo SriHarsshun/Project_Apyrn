@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Version, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Version,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { UsersService } from './users.service';
@@ -32,7 +42,10 @@ export class UsersController {
   @Roles(Role.ADMIN, Role.MANAGER, Role.VIEWER)
   @ApiOperation({ summary: 'Get user by id' })
   @ApiResponse({ status: 200, type: UserResponseDto })
-  async findById(@Param('id') id: string, @CompanyId() companyId: string): Promise<{ data: UserResponseDto }> {
+  async findById(
+    @Param('id') id: string,
+    @CompanyId() companyId: string,
+  ): Promise<{ data: UserResponseDto }> {
     const data = await this.usersService.findById(id, companyId);
     return { data };
   }

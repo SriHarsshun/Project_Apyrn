@@ -14,7 +14,7 @@ describe('RedisService', () => {
       del: jest.fn(),
       exec: jest.fn().mockResolvedValue([]),
     };
-    
+
     // Create a mock stream
     const mockStream = {
       on: jest.fn((event, callback) => {
@@ -24,7 +24,7 @@ describe('RedisService', () => {
         if (event === 'end') {
           callback();
         }
-      })
+      }),
     };
 
     redisClient = {

@@ -9,7 +9,7 @@ export class RedisService implements OnModuleDestroy {
   constructor(private configService: ConfigService) {
     const host = this.configService.get<string>('REDIS_HOST') || 'localhost';
     const port = this.configService.get<number>('REDIS_PORT') || 6379;
-    
+
     this.client = new Redis({
       host,
       port,

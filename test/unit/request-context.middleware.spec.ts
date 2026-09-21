@@ -7,7 +7,7 @@ describe('RequestContextMiddleware', () => {
     const req = { headers: {} } as any;
     const res = {} as any;
     let called = false;
-    
+
     middleware.use(req, res, () => {
       called = true;
       const store = requestContext.getStore();

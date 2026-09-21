@@ -8,7 +8,7 @@ describe('PrismaAuthRepository', () => {
 
   beforeEach(async () => {
     prisma = {
-      $transaction: jest.fn(cb => cb(prisma)),
+      $transaction: jest.fn((cb) => cb(prisma)),
       company: { create: jest.fn() },
       user: { create: jest.fn(), findUnique: jest.fn() },
     };
@@ -23,7 +23,12 @@ describe('PrismaAuthRepository', () => {
   it('createUserWithCompany: creates company and user in transaction', async () => {
     prisma.company.create.mockResolvedValue({ id: 'c1' });
     prisma.user.create.mockResolvedValue({ id: 'u1' });
-    const res = await repository.createUserWithCompany({ email: 'e', password: 'p', name: 'n', companyName: 'c' });
+    const res = await repository.createUserWithCompany({
+      email: 'e',
+      password: 'p',
+      name: 'n',
+      companyName: 'c',
+    });
     expect(res.id).toBe('u1');
     expect(prisma.company.create).toHaveBeenCalled();
     expect(prisma.user.create).toHaveBeenCalled();

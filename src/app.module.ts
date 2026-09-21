@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 import { envSchema } from './config/env.schema';
 import { RequestContextMiddleware } from './common/middleware/request-context.middleware';
+import { getRequestContext } from './common/context/request-context';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { RedisModule } from './common/redis/redis.module';
 import { QueueModule } from './common/queues/queue.module';
@@ -22,7 +23,7 @@ import { HealthModule } from './health/health.module';
         pinoHttp: {
           transport: process.env.NODE_ENV !== 'production' ? { target: 'pino-pretty' } : undefined,
           mixin() {
-            const store = require('./common/context/request-context').getRequestContext();
+            const store = getRequestContext();
             return {
               requestId: store?.requestId,
               userId: store?.userId,

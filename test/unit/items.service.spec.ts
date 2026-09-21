@@ -29,23 +29,23 @@ describe('ItemsService', () => {
       adjustQuantity: jest.fn(),
       getInventorySummary: jest.fn(),
     };
-    
+
     redisClient = {
       get: jest.fn(),
       set: jest.fn(),
       del: jest.fn(),
     };
-    
+
     redisService = {
       getClient: jest.fn().mockReturnValue(redisClient),
     };
-    
+
     prismaService = {
       auditLog: {
         create: jest.fn(),
-      }
+      },
     };
-    
+
     queue = {
       add: jest.fn(),
     };
@@ -67,9 +67,9 @@ describe('ItemsService', () => {
     const item = createMockItem();
     itemRepository.create.mockResolvedValue(item);
     const dto = createMockCreateItemDto();
-    
+
     const result = await service.create(dto, 'company-id', 'user-id');
-    
+
     expect(result.id).toEqual(item.id);
     expect(redisClient.del).toHaveBeenCalledWith('inventory-summary:company-id');
     expect(prismaService.auditLog.create).toHaveBeenCalled();
@@ -78,9 +78,9 @@ describe('ItemsService', () => {
   it('findById: returns item', async () => {
     const item = createMockItem();
     itemRepository.findById.mockResolvedValue(item);
-    
+
     const result = await service.findById(item.id, 'company-id');
-    
+
     expect(result.id).toEqual(item.id);
   });
 
@@ -91,10 +91,15 @@ describe('ItemsService', () => {
 
   it('findMany: returns paginated results', async () => {
     const items = [createMockItem()];
-    itemRepository.findMany.mockResolvedValue({ items, total: 1, nextCursor: null, hasMore: false });
-    
+    itemRepository.findMany.mockResolvedValue({
+      items,
+      total: 1,
+      nextCursor: null,
+      hasMore: false,
+    });
+
     const result = await service.findMany({ limit: 10 }, 'company-id');
-    
+
     expect(result.items.length).toBe(1);
     expect(result.items[0].id).toBe(items[0].id);
   });
@@ -103,9 +108,9 @@ describe('ItemsService', () => {
     const item = createMockItem();
     itemRepository.findById.mockResolvedValue(item);
     itemRepository.update.mockResolvedValue(item);
-    
+
     const result = await service.update(item.id, { title: 'New' } as any, 'company-id', 'user-id');
-    
+
     expect(result.id).toEqual(item.id);
     expect(redisClient.del).toHaveBeenCalledWith('inventory-summary:company-id');
   });
@@ -114,9 +119,9 @@ describe('ItemsService', () => {
     const item = createMockItem();
     itemRepository.findById.mockResolvedValue(item);
     itemRepository.softDelete.mockResolvedValue(item);
-    
+
     await service.softDelete(item.id, 'company-id', 'user-id');
-    
+
     expect(redisClient.del).toHaveBeenCalledWith('inventory-summary:company-id');
   });
 
@@ -124,9 +129,9 @@ describe('ItemsService', () => {
     const item = createMockItem({ quantity: 150 });
     itemRepository.adjustQuantity.mockResolvedValue({ item, auditLog: {} });
     const dto = createMockAdjustItemDto();
-    
+
     const result = await service.adjustQuantity(item.id, dto, 'company-id', 'user-id');
-    
+
     expect(result.id).toEqual(item.id);
     expect(redisClient.del).toHaveBeenCalledWith('inventory-summary:company-id');
   });
@@ -135,18 +140,22 @@ describe('ItemsService', () => {
     const item = createMockItem({ quantity: 5, status: 'LOW_STOCK' });
     itemRepository.adjustQuantity.mockResolvedValue({ item, auditLog: {} });
     const dto = createMockAdjustItemDto();
-    
+
     await service.adjustQuantity(item.id, dto, 'company-id', 'user-id');
-    
-    expect(queue.add).toHaveBeenCalledWith('low-stock-alert', expect.any(Object), expect.any(Object));
+
+    expect(queue.add).toHaveBeenCalledWith(
+      'low-stock-alert',
+      expect.any(Object),
+      expect.any(Object),
+    );
   });
 
   it('getInventorySummary: returns cached data on cache hit', async () => {
     const summary = { inStock: 10 };
     redisClient.get.mockResolvedValue(JSON.stringify(summary));
-    
+
     const result = await service.getInventorySummary('company-id');
-    
+
     expect(result).toEqual(summary);
     expect(itemRepository.getInventorySummary).not.toHaveBeenCalled();
   });
@@ -155,9 +164,9 @@ describe('ItemsService', () => {
     const summary = { inStock: 10 };
     redisClient.get.mockResolvedValue(null);
     itemRepository.getInventorySummary.mockResolvedValue(summary);
-    
+
     const result = await service.getInventorySummary('company-id');
-    
+
     expect(result).toEqual(summary);
     expect(redisClient.set).toHaveBeenCalled();
   });

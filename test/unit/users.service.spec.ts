@@ -32,7 +32,7 @@ describe('UsersService', () => {
     const users = [createMockUser()];
     userRepository.findAll.mockResolvedValue(users);
     const result = await service.findAll('company-id');
-    expect(result).toEqual(users.map(u => expect.objectContaining({ id: u.id })));
+    expect(result).toEqual(users.map((u) => expect.objectContaining({ id: u.id })));
   });
 
   it('findById: returns user', async () => {
@@ -58,7 +58,12 @@ describe('UsersService', () => {
     const user = createMockUser();
     userRepository.findById.mockResolvedValue(user);
     userRepository.update.mockResolvedValue(user);
-    const result = await service.update(user.id, { name: 'New Name' }, 'company-id', 'current-user-id');
+    const result = await service.update(
+      user.id,
+      { name: 'New Name' },
+      'company-id',
+      'current-user-id',
+    );
     expect(result).toEqual(expect.objectContaining({ id: user.id }));
   });
 

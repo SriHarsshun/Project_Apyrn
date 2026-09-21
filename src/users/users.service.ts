@@ -13,12 +13,16 @@ export class UsersService {
     private readonly prisma: PrismaService,
   ) {}
 
-  async create(dto: CreateUserDto, companyId: string, currentUserId: string): Promise<UserResponseDto> {
+  async create(
+    dto: CreateUserDto,
+    companyId: string,
+    currentUserId: string,
+  ): Promise<UserResponseDto> {
     const passwordHash = await bcrypt.hash(dto.password, 10);
-    
+
     try {
       const user = await this.userRepository.create({ ...dto, passwordHash }, companyId);
-      
+
       await this.prisma.auditLog.create({
         data: {
           action: 'CREATE_USER',
@@ -52,9 +56,14 @@ export class UsersService {
     return UserResponseDto.fromEntity(user);
   }
 
-  async update(id: string, dto: UpdateUserDto, companyId: string, currentUserId: string): Promise<UserResponseDto> {
+  async update(
+    id: string,
+    dto: UpdateUserDto,
+    companyId: string,
+    currentUserId: string,
+  ): Promise<UserResponseDto> {
     const user = await this.userRepository.update(id, dto, companyId);
-    
+
     await this.prisma.auditLog.create({
       data: {
         action: 'UPDATE_USER',
@@ -71,7 +80,7 @@ export class UsersService {
 
   async delete(id: string, companyId: string, currentUserId: string): Promise<UserResponseDto> {
     const user = await this.userRepository.delete(id, companyId);
-    
+
     await this.prisma.auditLog.create({
       data: {
         action: 'DELETE_USER',
