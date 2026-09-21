@@ -9,6 +9,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     // Soft delete middleware
     this.$use(async (params, next) => {
       if (params.model === 'Item') {
+        if (!params.args) params.args = {};
         if (params.action === 'findUnique' || params.action === 'findFirst') {
           params.action = 'findFirst';
           params.args.where = { ...params.args.where, deletedAt: null };
@@ -40,12 +41,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
           }
         }
         if (params.action === 'count') {
-          if (params.args?.where) {
+          if (params.args.where) {
             if (params.args.where.deletedAt === undefined) {
               params.args.where.deletedAt = null;
             }
           } else {
-            if (!params.args) params.args = {};
             params.args.where = { deletedAt: null };
           }
         }

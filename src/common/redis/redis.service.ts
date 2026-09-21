@@ -13,6 +13,7 @@ export class RedisService implements OnModuleDestroy {
     this.client = new Redis({
       host,
       port,
+      maxRetriesPerRequest: null,
     });
   }
 

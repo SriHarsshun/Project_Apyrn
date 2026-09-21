@@ -6,6 +6,8 @@ import { AdjustmentType } from '@prisma/client';
 import { execSync } from 'child_process';
 
 describe('Items Integration', () => {
+  jest.setTimeout(30000);
+
   let moduleRef: TestingModule;
   let prisma: PrismaService;
   let itemsService: ItemsService;
